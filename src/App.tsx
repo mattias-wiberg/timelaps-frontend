@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import './App.css'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Slider } from "@/components/ui/slider"
 
 interface Image {
   filename: string;
@@ -128,9 +131,13 @@ function App() {
   // Render loading state
   if (loading && images.length === 0) {
     return (
-      <div className="app-container">
-        <h1>Timelapse Viewer</h1>
-        <div className="loading">Loading images...</div>
+      <div className="flex flex-col items-center gap-6 max-w-5xl mx-auto p-8">
+        <h1 className="text-3xl font-bold">Timelapse Viewer</h1>
+        <Card className="w-full">
+          <CardContent className="flex justify-center items-center p-8">
+            <p>Loading images...</p>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -138,12 +145,14 @@ function App() {
   // Render error state
   if (error && images.length === 0) {
     return (
-      <div className="app-container">
-        <h1>Timelapse Viewer</h1>
-        <div className="error-message">{error}</div>
-        <button className="retry-button" onClick={fetchImages}>
-          Retry
-        </button>
+      <div className="flex flex-col items-center gap-6 max-w-5xl mx-auto p-8">
+        <h1 className="text-3xl font-bold">Timelapse Viewer</h1>
+        <Card className="w-full">
+          <CardContent className="flex flex-col gap-4 items-center p-8">
+            <p className="text-red-500">{error}</p>
+            <Button onClick={fetchImages}>Retry</Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -151,171 +160,184 @@ function App() {
   // Render no images state
   if (images.length === 0) {
     return (
-      <div className="app-container">
-        <h1>Timelapse Viewer</h1>
-        <div className="no-images">
-          No images available. Start capturing with the camera app first.
-        </div>
+      <div className="flex flex-col items-center gap-6 max-w-5xl mx-auto p-8">
+        <h1 className="text-3xl font-bold">Timelapse Viewer</h1>
+        <Card className="w-full">
+          <CardContent className="flex justify-center items-center p-8">
+            <p>No images available. Start capturing with the camera app first.</p>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   return (
-    <div className="app-container">
-      <h1>Timelapse Viewer</h1>
+    <div className="flex flex-col items-center gap-6 max-w-5xl mx-auto p-8">
+      <h1 className="text-3xl font-bold">Timelapse Viewer</h1>
 
-      {/* View mode tabs */}
-      <div className="view-tabs">
-        <button 
-          className={`tab-button ${viewMode === 'gallery' ? 'active' : ''}`}
-          onClick={() => setViewMode('gallery')}
-        >
-          Gallery
-        </button>
-        <button 
-          className={`tab-button ${viewMode === 'timeline' ? 'active' : ''}`}
-          onClick={() => setViewMode('timeline')}
-        >
-          Timeline
-        </button>
-        <button 
-          className={`tab-button ${viewMode === 'live' ? 'active' : ''}`}
-          onClick={() => setViewMode('live')}
-        >
-          Live View
-        </button>
-      </div>
+      <Tabs 
+        value={viewMode} 
+        onValueChange={setViewMode} 
+        className="w-full"
+      >
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="gallery">Gallery</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="live">Live View</TabsTrigger>
+        </TabsList>
 
-      {/* Gallery View */}
-      {viewMode === 'gallery' && (
-        <div className="gallery-container">
-          <div className="image-grid">
+        {/* Gallery View */}
+        <TabsContent value="gallery">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {images.map((image, index) => (
-              <div key={image.filename} className="image-tile">
-                <img 
-                  src={`http://localhost:3000${image.path}`}
-                  alt={`Timelapse frame ${index}`}
-                  loading="lazy"
-                  onClick={() => {
-                    setCurrentImageIndex(index)
-                    setViewMode('timeline')
-                  }}
-                />
-                <div className="image-timestamp">
+              <Card key={image.filename} className="overflow-hidden">
+                <CardContent className="p-0">
+                  <img 
+                    src={`http://localhost:3000${image.path}`}
+                    alt={`Timelapse frame ${index}`}
+                    className="w-full h-48 object-cover cursor-pointer"
+                    loading="lazy"
+                    onClick={() => {
+                      setCurrentImageIndex(index)
+                      setViewMode('timeline')
+                    }}
+                  />
+                </CardContent>
+                <CardFooter className="p-2 text-xs text-gray-500">
                   {formatTimestamp(image.timestamp)}
-                </div>
-              </div>
+                </CardFooter>
+              </Card>
             ))}
           </div>
-        </div>
-      )}
+        </TabsContent>
 
-      {/* Timeline View */}
-      {viewMode === 'timeline' && (
-        <div className="timeline-container">
-          <div className="current-image">
-            <img 
-              src={`http://localhost:3000${images[currentImageIndex].path}`}
-              alt={`Timelapse frame ${currentImageIndex}`}
-            />
-            <div className="image-info">
-              <span>{`Frame ${currentImageIndex + 1} of ${images.length}`}</span>
-              <span>{formatTimestamp(images[currentImageIndex].timestamp)}</span>
-            </div>
-          </div>
+        {/* Timeline View */}
+        <TabsContent value="timeline">
+          <Card className="mb-4">
+            <CardContent className="p-0 relative">
+              <img 
+                src={`http://localhost:3000${images[currentImageIndex].path}`}
+                alt={`Timelapse frame ${currentImageIndex}`}
+                className="w-full"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 flex justify-between text-sm">
+                <span>{`Frame ${currentImageIndex + 1} of ${images.length}`}</span>
+                <span>{formatTimestamp(images[currentImageIndex].timestamp)}</span>
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="timeline-controls">
-            <button 
-              className="control-button"
-              onClick={() => setCurrentImageIndex(0)}
-            >
-              ⏮️ First
-            </button>
-            <button 
-              className="control-button"
-              onClick={() => setCurrentImageIndex(prev => Math.max(0, prev - 1))}
-              disabled={currentImageIndex === 0}
-            >
-              ⏪ Previous
-            </button>
-            <button 
-              className="control-button play-button"
-              onClick={togglePlayback}
-            >
-              {isPlaying ? '⏸️ Pause' : '▶️ Play'}
-            </button>
-            <button 
-              className="control-button"
-              onClick={() => setCurrentImageIndex(prev => Math.min(images.length - 1, prev + 1))}
-              disabled={currentImageIndex === images.length - 1}
-            >
-              ⏩ Next
-            </button>
-            <button 
-              className="control-button"
-              onClick={() => setCurrentImageIndex(images.length - 1)}
-            >
-              ⏭️ Last
-            </button>
-          </div>
+          <Card className="mb-4">
+            <CardContent className="p-4 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentImageIndex(0)}
+                className="flex-1"
+              >
+                ⏮️ First
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setCurrentImageIndex(prev => Math.max(0, prev - 1))}
+                disabled={currentImageIndex === 0}
+                className="flex-1"
+              >
+                ⏪ Previous
+              </Button>
+              <Button
+                variant={isPlaying ? "destructive" : "default"}
+                onClick={togglePlayback}
+                className="flex-1"
+              >
+                {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setCurrentImageIndex(prev => Math.min(images.length - 1, prev + 1))}
+                disabled={currentImageIndex === images.length - 1}
+                className="flex-1"
+              >
+                ⏩ Next
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setCurrentImageIndex(images.length - 1)}
+                className="flex-1"
+              >
+                ⏭️ Last
+              </Button>
+            </CardContent>
+          </Card>
 
-          <div className="speed-controls">
-            <label htmlFor="playback-speed">Playback Speed (fps): </label>
-            <input 
-              id="playback-speed"
-              type="range"
-              min="0.5"
-              max="10"
-              step="0.5"
-              value={playbackSpeed}
-              onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
-            />
-            <span>{playbackSpeed} fps</span>
-          </div>
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle className="text-lg">
+                Playback Speed: {playbackSpeed} fps
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Slider
+                min={0.5}
+                max={10}
+                step={0.5}
+                value={[playbackSpeed]}
+                onValueChange={(values) => setPlaybackSpeed(values[0])}
+              />
+            </CardContent>
+          </Card>
 
-          <button className="create-video-button" onClick={createVideo}>
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={createVideo}
+          >
             Create Video from Timelapse
-          </button>
+          </Button>
 
-          <div className="timeline-scrubber">
-            <input 
-              type="range"
-              min="0"
+          <div className="mt-4 w-full">
+            <Slider
+              min={0}
               max={images.length - 1}
-              value={currentImageIndex}
-              onChange={(e) => setCurrentImageIndex(parseInt(e.target.value))}
-              className="scrubber"
+              value={[currentImageIndex]}
+              onValueChange={(values) => setCurrentImageIndex(values[0])}
+              className="w-full"
             />
           </div>
-        </div>
-      )}
+        </TabsContent>
 
-      {/* Live View */}
-      {viewMode === 'live' && (
-        <div className="live-container">
+        {/* Live View */}
+        <TabsContent value="live">
           {liveImage ? (
-            <>
-              <div className="live-image">
+            <Card className="mb-4">
+              <CardContent className="p-0 relative">
                 <img 
                   src={`http://localhost:3000${liveImage.path}`}
                   alt="Live camera view"
+                  className="w-full"
                 />
-                <div className="live-indicator">LIVE</div>
-              </div>
-              <div className="live-timestamp">
+                <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md animate-pulse">
+                  LIVE
+                </div>
+              </CardContent>
+              <CardFooter>
                 Last update: {formatTimestamp(liveImage.timestamp)}
-              </div>
-            </>
+              </CardFooter>
+            </Card>
           ) : (
-            <div className="no-live-image">
-              No live image available. Make sure the camera is running.
-            </div>
+            <Card className="mb-4">
+              <CardContent className="p-8 flex justify-center items-center">
+                No live image available. Make sure the camera is running.
+              </CardContent>
+            </Card>
           )}
-          <button className="refresh-button" onClick={fetchLiveImage}>
+          <Button 
+            onClick={fetchLiveImage}
+            className="w-full"
+          >
             Refresh Now
-          </button>
-        </div>
-      )}
+          </Button>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
