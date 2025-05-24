@@ -69,7 +69,7 @@ function App() {
     setError(null)
 
     try {
-      const response = await fetch('http://localhost:3000/timelapse/images')
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/timelapse/images`);
       if (!response.ok) {
         throw new Error(`Server returned ${response.status}`)
       }
@@ -92,7 +92,7 @@ function App() {
   // Fetch the latest image for live view
   const fetchLiveImage = async () => {
     try {
-      const response = await fetch('http://localhost:3000/timelapse/latest')
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/timelapse/latest`);
       if (!response.ok) {
         throw new Error(`Server returned ${response.status}`)
       }
@@ -192,9 +192,10 @@ function App() {
             {images.map((image, index) => (
               <Card key={image.filename} className="overflow-hidden">
                 <CardContent className="p-0">
-                  <img 
-                    src={`http://localhost:3000${image.path}`}
-                    alt={`Timelapse frame ${index}`}
+                  <img
+                    key={image.path} // Using image.path as the key
+                    src={`${import.meta.env.VITE_API_BASE_URL}${image.path}`}
+                    alt={`Timelapse image ${index + 1}`}
                     className="w-full h-48 object-cover cursor-pointer"
                     loading="lazy"
                     onClick={() => {
@@ -215,9 +216,9 @@ function App() {
         <TabsContent value="timeline">
           <Card className="mb-4">
             <CardContent className="p-0 relative">
-              <img 
-                src={`http://localhost:3000${images[currentImageIndex].path}`}
-                alt={`Timelapse frame ${currentImageIndex}`}
+              <img
+                src={`${import.meta.env.VITE_API_BASE_URL}${images[currentImageIndex].path}`}
+                alt="Timelapse image"
                 className="w-full"
               />
               <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 flex justify-between text-sm">
@@ -310,9 +311,9 @@ function App() {
           {liveImage ? (
             <Card className="mb-4">
               <CardContent className="p-0 relative">
-                <img 
-                  src={`http://localhost:3000${liveImage.path}`}
-                  alt="Live camera view"
+                <img
+                  src={`${import.meta.env.VITE_API_BASE_URL}${liveImage.path}`}
+                  alt="Live image"
                   className="w-full"
                 />
                 <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md animate-pulse">
